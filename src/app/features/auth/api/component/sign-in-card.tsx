@@ -1,3 +1,5 @@
+import { useAuthActions } from "@convex-dev/auth/react"
+
 
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
@@ -12,16 +14,24 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SignInFlow } from "@/app/features/types";
 import { useState } from "react";
+import { signIn } from "../../../../../../convex/auth";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
 }
 
 
-
 export const SignInCard = ({setState}: SignInCardProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const { signIn } = useAuthActions();
+
+  const handleProvider = (value: "google") => {
+    signIn(value);
+  } 
+
+
   return (
     <Card className="w-full h-full p-8">
       <CardHeader className="p-0">
@@ -57,7 +67,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
         <div className="flex flex-col gap-y-2.5">
           <Button
             disabled={false}
-            onClick={() => {}}
+            onClick={() => handleProvider("google")}
             variant={"outline"}
             size={"lg"}
             className="w-full flex justify-between"
