@@ -1,4 +1,3 @@
-"use client";
 
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
@@ -11,14 +10,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import React, { useState } from "react"
 import { SignInFlow } from "@/app/features/types";
+import { useState } from "react";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
 }
 
+
+
 export const SignInCard = ({setState}: SignInCardProps) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <Card className="w-full h-full p-8">
       <CardHeader className="p-0">
@@ -30,8 +33,8 @@ export const SignInCard = ({setState}: SignInCardProps) => {
       <CardContent className="space-y-5 px-0 pb-0">
         <form className="space-y-2.5">
           <Input
-            value={""}
-            onChange={() => {}}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             disabled={false}
             placeholder="email"
             type="email"
@@ -39,8 +42,8 @@ export const SignInCard = ({setState}: SignInCardProps) => {
           />
 
           <Input
-            value={""}
-            onChange={() => {}}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             disabled={false}
             placeholder="password"
             type="passowrd"
@@ -57,13 +60,14 @@ export const SignInCard = ({setState}: SignInCardProps) => {
             onClick={() => {}}
             variant={"outline"}
             size={"lg"}
-            className="w-full relative"
+            className="w-full flex justify-between"
           >
-            <FcGoogle className="size-5 ablsolute top-2.5 left-2.5 " />
-            Continue With Google
+            <FcGoogle className="size-5" />
+            <span>Continue With Google</span>
+            <div />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p onClick={()=> {setState("signUp")}} className="text-xs text-muted-foreground">
             Don&apos;t have account? <span className="text-sky-700 hover:underline cursor-pointer">Sign Up</span>
         </p>
       </CardContent>
