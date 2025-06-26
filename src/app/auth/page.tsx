@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthScreen } from "../features/auth/api/component/auth-screen"
+import { AuthScreen } from "../features/auth/component/auth-screen"
 
 const AuthPage = () => {
     return (

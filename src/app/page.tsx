@@ -1,10 +1,13 @@
 "use client";
 
-import { AuthScreen } from "./features/auth/api/component/auth-screen";
+import { HomeHeader } from "@/components/home/home-header";
+import { AuthScreen } from "./features/auth/component/auth-screen";
 
 export default function Home() {
   // const tasks = useQuery(api.task.get);
   return (
-    <div>Home Page</div>
+    <div>
+      <HomeHeader/>
+    </div>
   );
 }
