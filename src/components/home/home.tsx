@@ -1,4 +1,6 @@
 import { UserButton } from "@/app/features/auth/component/user-button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
+import { Toaster } from "sonner"
 
 
 
@@ -8,6 +10,7 @@ import { UserButton } from "@/app/features/auth/component/user-button"
 export const HomeHeader = () => {
     return (
         <div>
+            <Toaster />
             <UserButton />
         </div>
     )
