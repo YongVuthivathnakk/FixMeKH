@@ -1,10 +1,17 @@
 "use client";
 
-import { AuthScreen } from "./features/auth/api/component/auth-screen";
+import { HomeFooter, HomeHeader, HomeMain } from "@/components/home/home";
+import { AuthScreen } from "./features/auth/component/auth-screen";
+
 
 export default function Home() {
-  // TODO: Design the home page
+
+  
   return (
-    <div>Home Page</div>
+    <div>
+      <HomeHeader/>
+      <HomeMain />
+      <HomeFooter />
+    </div>
   );
 }
