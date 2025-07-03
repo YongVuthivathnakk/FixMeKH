@@ -12,18 +12,23 @@ const isAdminPage = createRouteMatcher(["/admin/auth"]);
 export default convexAuthNextjsMiddleware(async (request, {convexAuth}) => {
   const pathname = request.nextUrl.pathname;
 
+
+  if(pathname === "/") {
+    if (!isPublicPage(request) && !(await convexAuth.isAuthenticated())) {
+      return nextjsMiddlewareRedirect(request, "/auth");
+    }
+  
+    if(isPublicPage(request) && (await convexAuth.isAuthenticated())) {
+      return nextjsMiddlewareRedirect(request, "/");
+    }
+  }
+
   if(pathname === "/admin") {
     return nextjsMiddlewareRedirect(request, "/admin/auth");
-  } else if (!isPublicPage(request) && !(await convexAuth.isAuthenticated())) {
-    return nextjsMiddlewareRedirect(request, "/auth");
   }
 
-  if(isPublicPage(request) && (await convexAuth.isAuthenticated())) {
-    return nextjsMiddlewareRedirect(request, "/");
-  }
 
 });
-
 export const config = {
   // The following matcher runs middleware on all routes
   // except static assets.
