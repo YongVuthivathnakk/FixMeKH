@@ -1,44 +1,35 @@
 "use client";
-import { useCurrentUsers } from "@/app/features/auth/api/use-current-user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CircleArrowLeftIcon, Loader } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 
-interface UserIdpageProps {
-    params: {
-        userId: string;
-    },
-};
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { UserHeader } from "./components/user-header";
 
+export default function UserPage() {
+    const user = useQuery(api.users.current);
 
-const UserIdPage = ({ params }: UserIdpageProps) => {
-    const router = useRouter();
-const { data, isLoading } = useCurrentUsers();
-    
-    if (isLoading) {
-        return <Loader className="size-4 animate-spin text-muted-foreground" />
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+                </div>
+            </div>
+        );
     }
 
-    if (!data) {
-        return null;
-    }
+    const { name, image } = user;
 
-    const {_creationTime, name, image, email, phone } = data;
-
-    const avatarFallback = name!.charAt(0).toUpperCase();
-
-    
     return (
-        <div>
-            <CircleArrowLeftIcon onClick={() => router.back()} />
-            <Avatar className="size-10 hover:opacity-75 transition">
-                <AvatarImage alt={name} src={image} />
-                <AvatarFallback className="bg-[#ee3d41] text-white">
-                    {avatarFallback}
-                </AvatarFallback>
-            </Avatar>
+        <div className="container mx-auto px-4 py-8">
+            <UserHeader name={name} image={image} />
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">User Profile</h2>
+                <div className="bg-card p-6 rounded-lg shadow">
+                    <p className="text-muted-foreground">
+                        Welcome, {name || "User"}!
+                    </p>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-
-export default UserIdPage

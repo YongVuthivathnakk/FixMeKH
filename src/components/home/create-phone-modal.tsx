@@ -1,6 +1,5 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import { useEffect, useState } from "react";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -42,7 +41,7 @@ export const CreatePhoneModal = ({ phone }: CreatePhoneModalProps) => {
         try {
             await updateUserPhone({ phone: phoneNumber });
             toast.success("Phone number added successfully!");
-        } catch (err) {
+        } catch {
             setError("Failed to update phone number!")
         }
     }
