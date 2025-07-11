@@ -1,10 +1,9 @@
 const AdminPage = () => {
-  return(
-    <div>
-      AdminPage
-    </div>
-  )
+    return(
+        <div className="">
+            Main
+        </div>
+    )
 }
-
 
 export default AdminPage;

@@ -98,9 +98,6 @@ export const SignInCard = ({setState}: SignInCardProps) => {
             <FcGoogle className="size-5 absolute top-2.5 left-2.5" />
             <span>Continue With Google</span>
           </Button>
-          <Button onClick={signOut} >
-              sign out
-          </Button>
         </div>
         <p onClick={()=> {setState("signUp")}} className="text-xs text-muted-foreground">
             Don&apos;t have account? <span className="text-sky-700 hover:underline cursor-pointer">Sign Up</span>
