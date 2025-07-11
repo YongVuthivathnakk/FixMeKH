@@ -23,9 +23,9 @@ export default convexAuthNextjsMiddleware(async (request, {convexAuth}) => {
     }
   }
 
-  if(pathname === "/admin") {
-    return nextjsMiddlewareRedirect(request, "/admin/auth");
-  }
+  // if(pathname === "/admin") {
+  //   return nextjsMiddlewareRedirect(request, "/admin/auth");
+  // }
 
 
 });

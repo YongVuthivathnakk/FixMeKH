@@ -4,9 +4,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
 import { TriangleAlert } from "lucide-react";
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { api } from "../../../../../convex/_generated/api";
 
 interface SignUpCardProps {
     setState: (state: SignInFlow) => void;
@@ -21,7 +23,6 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState("");
-
 
     const { signIn } = useAuthActions();
 
@@ -38,7 +39,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             })
             .finally(() => {
                 setIsPending(false)
-            })
+            });
         setIsPending(true);
 
     }

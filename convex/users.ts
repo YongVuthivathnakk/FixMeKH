@@ -26,3 +26,15 @@ export const updatePhone = mutation({
         await ctx.db.patch(userId, { phone: args.phone });
     }
 })
+
+
+export const defineDefaultRole = mutation( {
+    args: { },
+    handler: async (ctx, args) => {
+        const userId = await auth.getUserId(ctx);
+        if(userId === null) {
+            throw new Error("not authenthicated");
+        }
+        await ctx.db.patch(userId, { role: "user" });
+    }
+});
