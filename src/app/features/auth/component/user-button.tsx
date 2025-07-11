@@ -45,7 +45,6 @@ export const UserButton = () => {
                     </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="center" side="right" className="w-60">
-
                     <DropdownMenuLabel>
                         My Account
                     </DropdownMenuLabel>
