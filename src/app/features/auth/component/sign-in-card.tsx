@@ -27,6 +27,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
 
+  const { signOut } = useAuthActions();
   const { signIn } = useAuthActions();
 
 
@@ -96,6 +97,9 @@ export const SignInCard = ({setState}: SignInCardProps) => {
           >
             <FcGoogle className="size-5 absolute top-2.5 left-2.5" />
             <span>Continue With Google</span>
+          </Button>
+          <Button onClick={signOut} >
+              sign out
           </Button>
         </div>
         <p onClick={()=> {setState("signUp")}} className="text-xs text-muted-foreground">

@@ -23,7 +23,6 @@
     const UserIdPage = ({ params }: UserIdpageProps) => {
     const router = useRouter();
     const { data, isLoading } = useCurrentUsers();
-
     if (isLoading) {
         return <Loader className="size-4 animate-spin text-muted-foreground" />;
     }

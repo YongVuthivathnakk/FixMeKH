@@ -124,6 +124,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
                         <FcGoogle className="size-5 absolute top-2.5 left-2.5" />
                         <span>Continue With Google</span>
                     </Button>
+
                 </div>
                 <p onClick={() => { setState("signIn") }} className="text-xs text-muted-foreground">
                     Already have an account? <span className="text-sky-700 hover:underline cursor-pointer">Sign In</span>
