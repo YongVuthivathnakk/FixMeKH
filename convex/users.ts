@@ -15,6 +15,25 @@ export const current = query({
 })
 
 
+export const userRole = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await auth.getUserId(ctx);
+        if (userId === null) {
+            return null;
+        }
+
+        // Get the user document from the "users" table
+        const user = await ctx.db.get(userId);
+        if (!user) {
+            return null;
+        }
+
+        // Return the role field
+        return user.role;
+    }
+})
+
 
 export const updatePhone = mutation({
     args: { phone: v.string() },
@@ -38,3 +57,4 @@ export const defineDefaultRole = mutation( {
         await ctx.db.patch(userId, { role: "user" });
     }
 });
+
