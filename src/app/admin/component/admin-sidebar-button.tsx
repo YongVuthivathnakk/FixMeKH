@@ -1,25 +1,41 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
 import { IconType } from "react-icons/lib";
+import { useCurrentPage } from "../context/use-current-page";
 
 interface AdminSidebarButtonProps {
-    icon: LucideIcon | IconType;
-    label: string;
-    isActive?: boolean;
+    icon: LucideIcon | IconType,
+    label: string,
+    isActive?: boolean,
+    handleClick?: () => void,
+    setCurrentPage?: React.Dispatch<React.SetStateAction<string>>,
     currentPage?: string,
-    handleClick?: () => void;
 }
 
+ 
 
 export const AdminSidebarButton = ({
     icon: Icon,
     label,
     isActive,
-    currentPage,
-    handleClick,
+    setCurrentPage,
+    currentPage
 }: AdminSidebarButtonProps) => {
+
+    
+
+    const router = useRouter();
+
+    const handleClick = () => {
+        setCurrentPage?.(label);
+        router.push(`/admin/${label.toLowerCase()}`);
+    };
+
     isActive = currentPage == label;
+
     return (
         <div onClick={handleClick} className="flex flex-col gap-y-0.5 group px-3">
             <Button

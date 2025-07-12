@@ -4,22 +4,20 @@ import { UserButton } from "@/app/features/auth/component/user-button";
 import { useCurrentUsers } from "@/app/features/auth/api/use-current-user";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
+import { AdminLogoutButton } from "./admin-logout-button";
 
 interface AdminSidebarProps {
     currentPage: string,
-    setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+    setCurrentPage: React.Dispatch<React.SetStateAction<string>>,
 }
 
-
-export const AdminSidebar = ({ currentPage, setCurrentPage }: AdminSidebarProps) => {
+export const AdminSidebar = ({ currentPage, setCurrentPage } : AdminSidebarProps) => {  
     const { data, isLoading } = useCurrentUsers();
-    const { _id, name, image } = data || {};
+    const { name } = data || {};
     const { signOut } = useAuthActions();
     
     const username = name?.charAt(0).toUpperCase() + String(name).slice(1);
 
-
-    
     
     return (
         <aside className="h-full flex flex-col gap-y-4 pt-[9px] pb-[12.5px] border-r-1">
@@ -32,14 +30,14 @@ export const AdminSidebar = ({ currentPage, setCurrentPage }: AdminSidebarProps)
             </div>
             <div className="flex flex-col gap-y-1.5 ">
                 <p className="px-3 text-[13px] font-semibold" >Page</p>
-                <AdminSidebarButton handleClick={ () => setCurrentPage("Dashboard") } icon={LayoutDashboard} label={"Dashboard"} currentPage={currentPage} />
-                <AdminSidebarButton handleClick={ () => setCurrentPage("Users") } icon={User} label={"Users"} currentPage={currentPage} />
-                <AdminSidebarButton handleClick={ () => setCurrentPage("Technician") } icon={UserRoundCog} label={"Technician"} currentPage={currentPage} />
-                <AdminSidebarButton handleClick={ () => setCurrentPage("Teams") } icon={Users} label={"Teams"} currentPage={currentPage} />
+                <AdminSidebarButton currentPage={currentPage} setCurrentPage={setCurrentPage} icon={LayoutDashboard} label={"Dashboard"} />
+                <AdminSidebarButton currentPage={currentPage} setCurrentPage={setCurrentPage} icon={User} label={"Users"} />
+                <AdminSidebarButton currentPage={currentPage} setCurrentPage={setCurrentPage} icon={UserRoundCog} label={"Technicians"} />
+                <AdminSidebarButton currentPage={currentPage} setCurrentPage={setCurrentPage} icon={Users} label={"Teams"} />
             </div>
             <div className="flex flex-col gap-y-1.5">
                 <p className="px-3 text-[13px] font-semibold">User</p>
-                <AdminSidebarButton handleClick={signOut} icon={LogOut} label={"Logout"} />
+                <AdminLogoutButton handleClick={signOut} icon={LogOut} label={"Logout"} />
             </div>
 
         </aside>

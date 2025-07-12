@@ -4,10 +4,8 @@ import {
   isAuthenticatedNextjs,
   nextjsMiddlewareRedirect,
 } from "@convex-dev/auth/nextjs/server";
-import { auth } from "../convex/auth";
-import { useCurrentUserRole } from "./app/features/auth/api/use-current-user-role";
 
-const isPublicPage = createRouteMatcher(["/auth", "/unauthorized"]);
+const isPublicPage = createRouteMatcher(["/auth"]);
 const isAdminPage = createRouteMatcher(["/admin"]);
 
 
@@ -20,12 +18,10 @@ export default convexAuthNextjsMiddleware(async (request) => {
     return nextjsMiddlewareRedirect(request, "/");
   }
 
-  if (isAdminPage(request)) {
-    const role : string = "admin";
-    if (role !== "admin") {
-      return nextjsMiddlewareRedirect(request, "/unauthorized");
-    }
+  if(isAdminPage(request)){
+    return nextjsMiddlewareRedirect(request, "/admin/dashboard");
   }
+
 });
 export const config = {
   // The following matcher runs middleware on all routes

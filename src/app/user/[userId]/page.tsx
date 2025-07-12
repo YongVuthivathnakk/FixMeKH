@@ -41,6 +41,9 @@
         year: "numeric",
     });
 
+
+    const username = name?.charAt(0).toUpperCase() + String(name).slice(1);
+    
     return (
         <div className=" w-full flex flex-col ">
         <header className="w-full mb-10 px-5 pt-5">
@@ -61,7 +64,7 @@
                         {avatarFallback}
                     </AvatarFallback>
                 </Avatar>
-                <p className="text-center text-2xl font-medium">{name}</p>
+                <p className="text-center text-2xl font-medium">{username}</p>
             </CardContent>
             <CardFooter>
                 <CardDescription>Member since {memberTime}</CardDescription>
@@ -70,6 +73,6 @@
         </main>
         </div>
     );
-    };
+};
 
 export default UserIdPage;

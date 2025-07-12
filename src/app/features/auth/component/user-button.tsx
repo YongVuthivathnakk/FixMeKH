@@ -25,7 +25,7 @@ export const UserButton = () => {
         return null;
     }
 
-    const { _id, _creationTime, name, image, email, phone, role } = data;
+    const { _id, name, image, phone, role } = data;
 
     const avatarFallback = name!.charAt(0).toUpperCase();
 
@@ -34,7 +34,7 @@ export const UserButton = () => {
     }
 
     const handleAdmin = () => {
-        router.push(`/admin`);
+        router.push(`/admin/dashboard`);
     }
 
     const handleHome = () => {
@@ -71,7 +71,7 @@ export const UserButton = () => {
                             Log out
                         </DropdownMenuItem>
                     )}
-                    {pathname == "/admin" && (
+                    {pathname.startsWith("/admin") && (
                         <DropdownMenuItem onClick={() => handleHome()} className="h-10">
                             Home
                         </DropdownMenuItem>
