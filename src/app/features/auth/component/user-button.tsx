@@ -14,8 +14,8 @@ import { usePathname, useRouter } from "next/navigation";
 export const UserButton = () => {
     const { signOut } = useAuthActions();
     const router = useRouter();
-    const { data, isLoading } = useCurrentUsers();
     const pathname = usePathname();
+    const { data, isLoading } = useCurrentUsers();
     
     if (isLoading) {
         return <Loader className="size-4 animate-spin text-muted-foreground" />
