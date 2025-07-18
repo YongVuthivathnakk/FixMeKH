@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const currentPageAtom = atom("Dashboard");
+export const currentPageAtom = atom("Users");

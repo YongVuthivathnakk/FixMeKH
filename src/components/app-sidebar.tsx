@@ -10,6 +10,8 @@ import {
   IconFileDescription,
   IconFileWord,
   IconFolder,
+  IconUser,
+  IconUserCog,
   IconHelp,
   IconInnerShadowTop,
   IconListDetails,
@@ -36,13 +38,9 @@ import { useQuery } from "convex/react"
 import { api } from "../../convex/_generated/api"
 import { useCurrentUsers } from "@/app/features/auth/api/use-current-user"
 import { Loader } from "lucide-react"
+import { AdminSidebarButton } from "@/app/admin/component/admin-sidebar-button"
 
 const uiData = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -51,17 +49,17 @@ const uiData = {
     },
     {
       title: "Users",
-      url: "#",
-      icon: IconListDetails,
+      url: "/admin/users",
+      icon: IconUser,
     },
     {
       title: "Technicians",
-      url: "#",
-      icon: IconChartBar,
+      url: "/admin/technicians",
+      icon: IconUserCog,
     },
     {
       title: "Teams",
-      url: "#",
+      url: "/admin/teams",
       icon: IconUsers,
     },
   ],
@@ -171,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="/">  
                 {/* <IconInnerShadowTop className="!size-5" /> */}
                 <h1 className="text-xl font-bold">FixMeKH</h1>
                 {/* <span className="text-base font-semibold">FixMeKH</span> */}
@@ -182,10 +180,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={uiData.navMain} />
+        {/* <AdminSidebarButton icon={IconDashboard} label={"Dashboard"} /> */}
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser name={name} email={email} avatar={image} avatarFallback={avatarFallback} isLoading={isLoading}/>
+        <NavUser _id={_id} name={name} email={email} avatar={image} avatarFallback={avatarFallback} isLoading={isLoading}/>
       </SidebarFooter>
     </Sidebar>
   )

@@ -10,6 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useAtom } from "jotai"
+import { currentPageAtom } from "@/app/admin/atoms/current-page"
+import { useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
+
 
 export function NavMain({
   items,
@@ -20,9 +25,26 @@ export function NavMain({
     icon?: Icon
   }[]
 }) {
+
+
+  const [currentPage, setCurrentPage] = useAtom(currentPageAtom);
+const router = useRouter(); 
+const pathname = usePathname();
+
+useEffect(() => {
+  const matchedItem = items.find(item => item.title === currentPage);
+
+  // ✅ only push if current pathname is different
+  if (matchedItem && pathname !== matchedItem.url) {
+    router.push(matchedItem.url);
+  }
+}, [currentPage, pathname]);
+
+
+
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
+      <SidebarGroupContent className="flex flex-col gap-2 ">
         {/* <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
@@ -45,7 +67,7 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
+              <SidebarMenuButton onClick={() => setCurrentPage(item.title)} isActive={currentPage == item.title} tooltip={item.title}>
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </SidebarMenuButton>

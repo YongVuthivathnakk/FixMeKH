@@ -13,7 +13,7 @@ const UnauthorizedPage = () => {
                 <p className="text-sm">You do not have permission to access this page.</p>
             </div>
         </div>
-        <Button variant={"outline"} onClick={() => router.push("/")}>Go back to Home</Button>
+        <Button variant={"outline"} onClick={() => router.push("/")}> Go back to Home</Button>
     </div>
   );
 }

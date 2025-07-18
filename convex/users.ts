@@ -14,6 +14,10 @@ export const current = query({
     }
 })
 
+export const getUsers = query(async ({db}) => {
+    const users = await db.query("users").collect();
+    return users;
+})
 
 export const userRole = query({
     args: {},

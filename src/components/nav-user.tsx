@@ -26,19 +26,26 @@ import {
 } from "@/components/ui/sidebar";
 import { Loader } from "lucide-react";
 import { UserButton } from "@/app/features/auth/component/user-button";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
 
 interface NavUserProps {
-  name: string | undefined;
-  email: string | undefined;
-  avatar: string | undefined;
-  avatarFallback: string;
+  _id?: string | undefined;
+  name?: string | undefined;
+  email?: string | undefined;
+  avatar?: string | undefined;
+  avatarFallback?: string;
   isLoading?: boolean;
 }
 
-export function NavUser({ name, email, avatar, avatarFallback, isLoading }: NavUserProps) {
+export function NavUser({_id, name, email, avatar, avatarFallback, isLoading }: NavUserProps) {
   const { isMobile } = useSidebar();
+  const { signOut } = useAuthActions();
+  const router = useRouter();
 
-
+  const hadnleAccount = () => {
+    router.push(`/user/${_id}`);
+  }
 
   if(isLoading) {
     return <Loader className="size-4 animate-spin text-muted-foreground" />
@@ -92,21 +99,13 @@ export function NavUser({ name, email, avatar, avatarFallback, isLoading }: NavU
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={hadnleAccount}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={signOut}>
               <IconLogout />
               Log out
             </DropdownMenuItem>
