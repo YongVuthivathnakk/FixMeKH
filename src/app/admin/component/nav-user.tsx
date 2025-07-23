@@ -24,33 +24,42 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Loader } from "lucide-react";
-import { UserButton } from "@/app/features/auth/component/user-button";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useCurrentUsers } from "@/app/features/auth/api/use-current-user";
+import { Home, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuthActions } from "@convex-dev/auth/react";
 
-interface NavUserProps {
-  _id?: string | undefined;
-  name?: string | undefined;
-  email?: string | undefined;
-  avatar?: string | undefined;
-  avatarFallback?: string;
-  isLoading?: boolean;
-}
-
-export function NavUser({_id, name, email, avatar, avatarFallback, isLoading }: NavUserProps) {
+export function NavUser() {
   const { isMobile } = useSidebar();
-  const { signOut } = useAuthActions();
+  const { data, isLoading } = useCurrentUsers();
   const router = useRouter();
+  const { signOut } = useAuthActions();
 
-  const hadnleAccount = () => {
+  if (isLoading) {
+    return <Loader className="size-4 animate-spin text-muted-foreground" />;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const { _id, name, image, email } = data;
+
+  const avatarFallback = name!.charAt(0).toUpperCase();
+
+  const handleAccount = () => {
     router.push(`/user/${_id}`);
   }
 
-  if(isLoading) {
-    return <Loader className="size-4 animate-spin text-muted-foreground" />
+  const handleSignout = () => {
+
   }
-  
+
+  const handleHome = () => {
+    router.push("/");
+  }
+
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -61,10 +70,8 @@ export function NavUser({_id, name, email, avatar, avatarFallback, isLoading }: 
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={avatar} alt={name} />
-                <AvatarFallback className="bg-[#ee3d41] text-white">
-                  {avatarFallback}
-                </AvatarFallback>
+                <AvatarImage src={image} alt={name} />
+                <AvatarFallback className="rounded-2xl bg-[#ee3d41] text-white">{avatarFallback}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
@@ -83,11 +90,9 @@ export function NavUser({_id, name, email, avatar, avatarFallback, isLoading }: 
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={avatar} alt={name} />
-                  <AvatarFallback className="bg-[#ee3d41] text-white">
-                    {avatarFallback}
-                  </AvatarFallback>
+                <Avatar className="h-8 w-8 rounded-2xl">
+                  <AvatarImage src={image} alt={name} />
+                  <AvatarFallback className="rounded-lg">{avatarFallback}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{name}</span>
@@ -99,7 +104,11 @@ export function NavUser({_id, name, email, avatar, avatarFallback, isLoading }: 
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={hadnleAccount}>
+              <DropdownMenuItem onClick={handleHome}>
+                <Home />
+                Home
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAccount}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>

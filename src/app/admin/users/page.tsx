@@ -1,59 +1,31 @@
+
 "use client";
 
-
 import { useAllUsers } from "@/app/features/admin/api/use-all-users";
-import { DataTable } from "@/components/data-table";
-import  data  from "../data.json"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, SlidersHorizontal } from "lucide-react";
+import { Loader, MoreHorizontal, SlidersHorizontal, Users } from "lucide-react";
 
-
-// const data = [
-//     {
-//         "id": 1,
-//         "header": "Cover page",
-//         "type": "Cover page",
-//         "status": "In Process",
-//         "target": "18",
-//         "limit": "5",
-//         "reviewer": "Eddie Lake"
-//     },
-// ];
-
-
-
+import { columns, User } from "../component/user/columns"
+import { DataTable } from "../component/user/data-table"
+ 
 const userDashboardPage = () => {
 
-
-    const users = useAllUsers();
-
-
-    // const users = [
-    //     {
-    //         id: 1,
-    //         name: "user01",
-    //         verificationTime: "1/1/1, 09:11:10",
-    //         phone: "123",
-    //         role: "user",
-    //     },
-    //     {
-    //         id: 2,
-    //         name: "user01",
-    //         verificationTime: "1/1/1, 09:11:10",
-    //         phone: "123",
-    //         role: "user",
-    //     }
-    // ];
-
-
+const users = useAllUsers();
+if(!users) {
     return (
-        <>
-            
-        </>
+    <div className="flex flex-col h-full gap-y-4 items-center justify-center">
+         <p className="text-lg font-bold">Loading</p>
+         <Loader className="size-4 animate-spin text-muted-foreground" />
+      </div>
     );
+}
+  return (
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={users} />
+    </div>
+  )
 }
 
 export default userDashboardPage;
