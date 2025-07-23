@@ -27,6 +27,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
 
+  const { signOut } = useAuthActions();
   const { signIn } = useAuthActions();
 
 

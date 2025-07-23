@@ -18,6 +18,7 @@ export const CreatePhoneModal = ({ phone }: CreatePhoneModalProps) => {
     const [open, setOpen] = useState(!phone);
     const [phoneNumber, setPhoneNumber] = useState("");
     const updateUserPhone = useMutation(api.users.updatePhone);
+    const defineDefaultRole = useMutation(api.users.defineDefaultRole)
     const [error, setError] = useState("");
 
 
@@ -41,6 +42,7 @@ export const CreatePhoneModal = ({ phone }: CreatePhoneModalProps) => {
         e.preventDefault();
         try {
             await updateUserPhone({ phone: phoneNumber });
+            await defineDefaultRole();
             toast.success("Phone number added successfully!");
         } catch (err) {
             setError("Failed to update phone number!")

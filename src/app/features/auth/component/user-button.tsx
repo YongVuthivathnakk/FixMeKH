@@ -6,7 +6,7 @@ import image from "next/image";
 import { useCurrentUsers } from "../api/use-current-user";
 import { useState } from "react";
 import { CreatePhoneModal } from "@/components/home/create-phone-modal";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 
 
@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 export const UserButton = () => {
     const { signOut } = useAuthActions();
     const router = useRouter();
+    const pathname = usePathname();
     const { data, isLoading } = useCurrentUsers();
     
     if (isLoading) {
@@ -24,7 +25,7 @@ export const UserButton = () => {
         return null;
     }
 
-    const { _id, _creationTime, name, image, email, phone } = data;
+    const { _id, name, image, phone, role } = data;
 
     const avatarFallback = name!.charAt(0).toUpperCase();
 
@@ -32,6 +33,13 @@ export const UserButton = () => {
         router.push(`/user/${_id}`);
     }
 
+    const handleAdmin = () => {
+        router.push(`/admin/dashboard`);
+    }
+
+    const handleHome = () => {
+        router.push(`/`);
+    }
 
     return (
         <div>
@@ -45,7 +53,6 @@ export const UserButton = () => {
                     </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="center" side="right" className="w-60">
-
                     <DropdownMenuLabel>
                         My Account
                     </DropdownMenuLabel>
@@ -53,15 +60,22 @@ export const UserButton = () => {
                     <DropdownMenuItem className="h-10" onClick={() => handleProfile()}>
                         Profile
                     </DropdownMenuItem>
-
-                    <DropdownMenuItem className="h-10">
-                        Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => signOut()} className="h-10">
-                        <LogOut className="size-4 mr-2" />
-                        Log out
-                    </DropdownMenuItem>
-
+                    {role === "admin" && pathname == "/" && (
+                        <DropdownMenuItem onClick={() => handleAdmin()} className="h-10">
+                            Admin Dashboard
+                        </DropdownMenuItem>
+                    )}
+                    {pathname == "/" && (
+                        <DropdownMenuItem onClick={() => signOut()} className="h-10">
+                            <LogOut className="size-4 mr-2" />
+                            Log out
+                        </DropdownMenuItem>
+                    )}
+                    {pathname.startsWith("/admin") && (
+                        <DropdownMenuItem onClick={() => handleHome()} className="h-10">
+                            Home
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
             <CreatePhoneModal phone={phone} />

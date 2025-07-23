@@ -1,5 +1,7 @@
 "use client";
+import { currentUserIdAtom } from "@/app/admin/atoms/current-user";
 import { useCurrentUsers } from "@/app/features/auth/api/use-current-user";
+import { useGetUserById } from "@/app/features/auth/api/use-user-by-id";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,18 +13,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAtom } from "jotai";
 import { ArrowLeft, Camera, CircleArrowLeftIcon, Loader } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-interface UserIdpageProps {
+interface UserDetailProps {
   params: {
     userId: string;
   };
 }
 
-const UserIdPage = ({ params }: UserIdpageProps) => {
+const UserDetail = ({ params }: UserDetailProps) => {
   const router = useRouter();
-  const { data, isLoading } = useCurrentUsers();
+  const [currentUserId] = useAtom(currentUserIdAtom);
+  console.log(currentUserId);
+  const { data, isLoading } = useGetUserById(currentUserId);
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-full gap-y-4 items-center justify-center">
@@ -77,4 +83,4 @@ const UserIdPage = ({ params }: UserIdpageProps) => {
   );
 };
 
-export default UserIdPage;
+export default UserDetail;
