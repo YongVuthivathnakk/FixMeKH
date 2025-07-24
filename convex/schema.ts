@@ -20,9 +20,8 @@ const schema = defineSchema({
     
     admins: defineTable({
         userId: v.id("users"),
-    }),
-
-
+        userName: v.string(),
+    }).index("by_userId", ["userId"]),
 });
 
 export default schema;

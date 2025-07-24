@@ -23,7 +23,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState("");
-
+    const setVerifiedTime = useMutation(api.users.setEmailVarifiactionTime);
     const { signIn } = useAuthActions();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,6 +38,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
                 setError("something went wrong");
             })
             .finally(() => {
+                setVerifiedTime();
                 setIsPending(false)
             });
         setIsPending(true);
