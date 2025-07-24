@@ -15,6 +15,9 @@ import { Separator } from "@/components/ui/separator";
 import { SignInFlow } from "@/app/features/types";
 import React, { useState } from "react";
 import { TriangleAlert } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import { setEmailVarifiactionTime } from "../../../../../convex/users";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
@@ -26,8 +29,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
   const [password, setPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
-
-  const { signOut } = useAuthActions();
+  const setVerifiedTime = useMutation(api.users.setEmailVarifiactionTime);
   const { signIn } = useAuthActions();
 
 
@@ -45,6 +47,7 @@ export const SignInCard = ({setState}: SignInCardProps) => {
         setError("Invalid Email or Password")
       })
       .finally(() => {
+        setVerifiedTime();
         setIsPending(false);
       })
   }
