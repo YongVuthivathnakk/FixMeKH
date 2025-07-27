@@ -44,12 +44,57 @@ import homeMain from "./asset/homemain.png";
 import { useGetTechnicians } from "@/app/features/technician/api/use-get-technicians";
 import { Skill } from "@/app/features/types";
 import { BookingList } from "./booking-list-modal";
+import FeatureSection from "./feature-section";
+import { useCurrentUsers } from "@/app/features/auth/api/use-current-user";
+import { api } from "../../../convex/_generated/api";
+import { useMutation } from "convex/react";
+import { Id } from "../../../convex/_generated/dataModel";
+import { toast } from "sonner";
 
 /**
  * Home Page Components for FixMeKH - Home Service Booking Platform
  * Built with Tailwind CSS and TypeScript (.tsx)
  * Features: Responsive design, service categories, platform features, and booking interface
  */
+
+const SERVICE_CARD = [
+  {
+    id: 1,
+    service: "PLumbing Services",
+    isAvialable: true,
+    description:
+      "Pipe repairs, leak fixes, drain cleaning, faucet installation, and emergency plumbing services.",
+    icon: Wrench,
+    skill: "plumber" as Skill,
+  },
+  {
+    id: 2,
+    service: "Electrical Work",
+    isAvialable: true,
+    description:
+      "Wiring installation, outlet repairs, lighting fixtures, electrical panel upgrades, and safety inspections.",
+    icon: Zap,
+    skill: "electrician" as Skill,
+  },
+  {
+    id: 3,
+    service: "Cleaning Service",
+    isAvialable: true,
+    description:
+      "Deep cleaning, regular housekeeping, carpet cleaning, window washing, and post-construction cleanup.",
+    icon: Sparkles,
+    skill: "cleaner" as Skill,
+  },
+  {
+    id: 4,
+    service: "Appliance Repair",
+    isAvialable: true,
+    description:
+      "Deep cleaning, regular housekeeping, carpet cleaning, window washing, and post-construction cleanup.",
+    icon: Settings,
+    skill: "appliance repair" as Skill,
+  },
+];
 
 export const HomeHeader = ({
   onOpenMyBookings,
@@ -91,123 +136,97 @@ export const HomeMain = ({
   isMyBookingsOpen: boolean;
   setIsMyBookingsOpen: (open: boolean) => void;
 }) => {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedBookingDetail, setSelectedBookingDetail] = useState<any>(null);
   const [isBookingDetailOpen, setIsBookingDetailOpen] = useState(false);
+
+  const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectTechnician, setSelectTechnician] = useState("");
   const [skill, setSkill] = useState<Skill>("plumber");
-  const [data, setData] = useState<any>();
-  const { technicians, isLoading } = useGetTechnicians(skill);
-  useEffect(() => {
-    console.log(technicians);
-  }, [technicians]);
 
-  // Form data states
-  const [bookingForm, setBookingForm] = useState({
-    date: "",
-    time: "Morning (9AM - 12PM)",
-    description: "",
-    address: "",
-    selectedProvider: selectTechnician,
-  });
+  const { data, isLoading } = useCurrentUsers();
+      const { technicians, isTechnicianLoading } = useGetTechnicians(skill);
 
-  // isMyBookingsOpen state is now passed as props
+      // Form data states
+      const [bookingForm, setBookingForm] = useState({
+        date: "",
+        time: "Morning (9AM - 12PM)",
+        description: "",
+        address: "",
+        selectedProvider: "",
+        status: "pending",
+      });
 
-  // Sample booking data (in real app, this would come from your database/API)
-//   const [myBookings, setMyBookings] = useState([
-//     {
-//       id: 1,
-//       service: "Plumbing Services",
-//       provider: "Professional Team A",
-//       providerPhone: "+855 12 345 678",
-//       providerEmail: "team.a@fixmekh.com",
-//       date: "2025-01-30",
-//       time: "Morning (9AM - 12PM)",
-//       status: "Confirmed",
-//       description: "Fix kitchen sink leak and check water pressure",
-//       price: "$85",
-//       address: "123 Main Street, Phnom Penh",
-//       bookingDate: "2025-01-26",
-//       estimatedDuration: "2-3 hours",
-//       notes: "Please call before arriving. Gate code: 1234",
-//       paymentMethod: "Cash on completion",
-//     },
-//     {
-//       id: 2,
-//       service: "Electrical Work",
-//       provider: "Expert Services Co.",
-//       providerPhone: "+855 12 987 654",
-//       providerEmail: "info@expertservices.com",
-//       date: "2025-02-02",
-//       time: "Afternoon (12PM - 5PM)",
-//       status: "Pending",
-//       description: "Install new lighting fixtures in living room and bedroom",
-//       price: "$150",
-//       address: "456 Oak Avenue, Phnom Penh",
-//       bookingDate: "2025-01-25",
-//       estimatedDuration: "3-4 hours",
-//       notes: "Bring LED bulbs. Customer will provide ladder if needed.",
-//       paymentMethod: "Bank transfer",
-//     },
-//   ]);
+
+  const createBooking = useMutation(api.bookings.createBooking);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full bg-background text-muted-foreground flex-col space-y-4">
+        <div className="animate-pulse text-xl font-medium">
+          Welcome! Getting things ready for you...
+        </div>
+        {/* <div className="h-2 w-48 bg-muted rounded animate-pulse" /> */}
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const { _id } = data;
 
   const handleServiceBooking = (serviceName: Skill) => {
     setSelectedService(serviceName);
     setIsBookingModalOpen(true);
     setSkill(serviceName);
 
-    // get data with the api
-    console.log(data);
     // Reset form when opening new booking
     setBookingForm({
       date: "",
       time: "Morning (9AM - 12PM)",
       description: "",
       address: "",
-      selectedProvider: selectTechnician,
+      status: "pending",
+      selectedProvider: "",
     });
   };
 
-  const handleBookingSubmit = () => {
-    // Validate form data
-    if (!bookingForm.date || !bookingForm.description || !bookingForm.address) {
-      alert("Please fill in all required fields (Date, Description, Address)");
+  const handleBookingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!bookingForm.date || !bookingForm.description || !bookingForm.address || !bookingForm.selectedProvider) {
+      toast.error("Please fill in all required fields.");
       return;
     }
 
-    // Get provider details based on selection
-    const providerDetails = {
-      "Professional Team A": {
-        phone: "+855 12 345 678",
-        email: "team.a@fixmekh.com",
-      },
-      "Expert Services Co.": {
-        phone: "+855 12 987 654",
-        email: "info@expertservices.com",
-      },
-    };
+    try {
+      const timestamp = new Date(bookingForm.date).getTime();
+      const userId = _id;
 
-    const selectedProviderInfo =
-      providerDetails[
-        bookingForm.selectedProvider as keyof typeof providerDetails
-      ];
+      await createBooking({
+        userId: userId as Id<"users">,
+        technicianId: bookingForm.selectedProvider as Id<"technicians">,
+        serviceType: selectedService as any,
+        description: bookingForm.description,
+        address: bookingForm.address,
+        bookingDate: timestamp,
+        timeSlot: bookingForm.time as any,
+        status: bookingForm.status as any,
+      });
 
-    // Create new booking object with actual form data
+      toast.success(
+        `Booking confirmed for ${selectedService} on ${bookingForm.date} at ${bookingForm.time}!`
+      );
 
-    // Add to bookings list
-    // setMyBookings((prev) => [...prev, newBooking]);
-
-    // Show success message and close modal
-    alert(
-      `Booking confirmed for ${selectedService} on ${bookingForm.date} at ${bookingForm.time}!`
-    );
-
-    setIsBookingModalOpen(false);
+      setIsBookingModalOpen(false);
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+      console.error(error);
+    }
   };
 
   const handleViewBookingDetail = (booking: any) => {
-    setSelectedBookingDetail(booking);
     setIsBookingDetailOpen(true);
   };
 
@@ -233,382 +252,256 @@ export const HomeMain = ({
           Home Service Categories
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group border-2 hover:border-primary/20">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Wrench className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle>Plumbing Services</CardTitle>
+          {SERVICE_CARD.map((card) => (
+            <Card
+              key={card.id}
+              className="hover:shadow-lg transition-shadow cursor-pointer group border-2 hover:border-primary/20"
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <card.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+                    <CardTitle>{card.service}</CardTitle>
+                  </div>
+                  {card.isAvialable ? (
+                    <Badge variant="secondary">Available</Badge>
+                  ) : (
+                    <Badge variant="outline">Unavailable</Badge>
+                  )}
                 </div>
-                <Badge variant="secondary">Available</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-grow">
-              <CardDescription className="mb-4">
-                Pipe repairs, leak fixes, drain cleaning, faucet installation,
-                and emergency plumbing services.
-              </CardDescription>
-              <Button
-                size="sm"
-                className="w-full mt-auto"
-                onClick={() => handleServiceBooking("plumber")}
-              >
-                Book Now
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group border-2 hover:border-primary/20">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Zap className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle>Electrical Work</CardTitle>
-                </div>
-                <Badge variant="secondary">Available</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-grow">
-              <CardDescription className="mb-4">
-                Wiring installation, outlet repairs, lighting fixtures,
-                electrical panel upgrades, and safety inspections.
-              </CardDescription>
-              <Button
-                size="sm"
-                className="w-full mt-auto"
-                onClick={() => handleServiceBooking("electrician")}
-              >
-                Book Now
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group border-2 hover:border-primary/20">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle>Cleaning Services</CardTitle>
-                </div>
-                <Badge variant="secondary">Available</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-grow">
-              <CardDescription className="mb-4">
-                Deep cleaning, regular housekeeping, carpet cleaning, window
-                washing, and post-construction cleanup.
-              </CardDescription>
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() => handleServiceBooking("cleaner")}
-              >
-                Book Now
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group border-2 hover:border-primary/20">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle>Appliance Repair</CardTitle>
-                </div>
-                <Badge variant="secondary">Available</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-grow">
-              <CardDescription className="mb-4">
-                Refrigerator, washing machine, dishwasher, oven repairs, and
-                appliance maintenance services.
-              </CardDescription>
-              <Button
-                size="sm"
-                className="w-full mt-auto"
-                onClick={() => handleServiceBooking("appliance repair")}
-              >
-                Book Now
-              </Button>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="flex flex-col flex-grow">
+                <CardDescription className="mb-4">
+                  {card.description}
+                </CardDescription>
+                <Button
+                  size="sm"
+                  className="w-full mt-auto"
+                  onClick={() => handleServiceBooking(card.skill)}
+                >
+                  Book Now
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="mb-12">
-        <h3 className="text-2xl font-semibold mb-6 text-center">
-          Platform Features
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="h-8 w-8 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Verified Providers</h4>
-            <p className="text-muted-foreground">
-              All service providers are thoroughly vetted and verified for your
-              safety and peace of mind
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Star className="h-8 w-8 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Provider Ratings</h4>
-            <p className="text-muted-foreground">
-              Read reviews and ratings from other customers to choose the best
-              service provider
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Real-time Updates</h4>
-            <p className="text-muted-foreground">
-              Track your service appointment with live updates and notifications
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="mb-12">
-        <h3 className="text-2xl font-semibold mb-6 text-center">
-          How It Works
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-blue-600">1</span>
-            </div>
-            <h4 className="font-semibold mb-2">Browse Services</h4>
-            <p className="text-muted-foreground">
-              Browse through our service categories and find what you need
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-green-600">2</span>
-            </div>
-            <h4 className="font-semibold mb-2">Schedule Appointment</h4>
-            <p className="text-muted-foreground">
-              Choose your preferred time and book with verified providers
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-purple-600">3</span>
-            </div>
-            <h4 className="font-semibold mb-2">Get Service Done</h4>
-            <p className="text-muted-foreground">
-              Enjoy professional service with real-time tracking and updates
-            </p>
-          </div>
-        </div>
-      </section>
+      <FeatureSection />
 
       {/* Service Booking Modal */}
       <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
         <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Book {selectedService}
-            </DialogTitle>
-            <DialogDescription>
-              Schedule your {selectedService?.toLowerCase()} appointment with
-              our verified providers.
-            </DialogDescription>
-          </DialogHeader>
+          <form onSubmit={handleBookingSubmit}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Book {selectedService}
+              </DialogTitle>
+              <DialogDescription>
+                Schedule your {selectedService?.toLowerCase()} appointment with
+                our verified providers.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="grid gap-6 py-4">
-            {/* Service Details */}
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Service Information</h4>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm">
-                    <strong>Service:</strong> {selectedService}
-                  </p>
-                  <p className="text-sm mt-1">
-                    <strong>Response Time:</strong> Within 24 hours
-                  </p>
-                  <p className="text-sm mt-1">
-                    <strong>Price Range:</strong> $50 - $200 (varies by service)
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Booking Form */}
+            <div className="grid gap-6 py-4">
+              {/* Service Details */}
               <div className="space-y-4">
-                <h4 className="font-semibold">Quick Booking</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Service Information</h4>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm">
+                      <strong>Service:</strong> {selectedService}
+                    </p>
+                    <p className="text-sm mt-1">
+                      <strong>Response Time:</strong> Within 24 hours
+                    </p>
+                    <p className="text-sm mt-1">
+                      <strong>Price Range:</strong> $50 - $200 (varies by
+                      service)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick Booking Form */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Quick Booking</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium" htmlFor="date">
+                        Preferred Date
+                      </label>
+                      <input
+                        id="date"
+                        type="date"
+                        className="w-full mt-1 p-2 border rounded-md"
+                        min={new Date().toISOString().split("T")[0]}
+                        value={bookingForm.date}
+                        onChange={(e) =>
+                          setBookingForm((prev) => ({
+                            ...prev,
+                            date: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="text-sm font-medium"
+                        htmlFor="time-option"
+                      >
+                        Preferred Time
+                      </label>
+                      <select
+                        className="w-full mt-1 p-2 border rounded-md"
+                        id="time-option"
+                        value={bookingForm.time}
+                        required
+                        onChange={(e) =>
+                          setBookingForm((prev) => ({
+                            ...prev,
+                            time: e.target.value,
+                          }))
+                        }
+                      >
+                        <option>Morning (9AM - 12PM)</option>
+                        <option>Afternoon (12PM - 5PM)</option>
+                        <option>Evening (5PM - 8PM)</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="text-sm font-medium">
-                      Preferred Date *
+                    <label className="text-sm font-medium" htmlFor="text">
+                      Service Address *
                     </label>
                     <input
-                      type="date"
+                      type="text"
+                      id="text"
                       className="w-full mt-1 p-2 border rounded-md"
-                      min={new Date().toISOString().split("T")[0]}
-                      value={bookingForm.date}
+                      placeholder="Enter your complete address..."
+                      value={bookingForm.address}
                       onChange={(e) =>
                         setBookingForm((prev) => ({
                           ...prev,
-                          date: e.target.value,
+                          address: e.target.value,
                         }))
                       }
                       required
                     />
                   </div>
+
                   <div>
-                    <label className="text-sm font-medium">
-                      Preferred Time
+                    <label
+                      className="text-sm font-medium"
+                      htmlFor="description"
+                    >
+                      Brief Description *
                     </label>
-                    <select
+                    <textarea
+                      id="description"
                       className="w-full mt-1 p-2 border rounded-md"
-                      value={bookingForm.time}
+                      rows={3}
+                      placeholder="Describe your service needs..."
+                      value={bookingForm.description}
                       onChange={(e) =>
                         setBookingForm((prev) => ({
                           ...prev,
-                          time: e.target.value,
+                          description: e.target.value,
                         }))
                       }
-                    >
-                      <option>Morning (9AM - 12PM)</option>
-                      <option>Afternoon (12PM - 5PM)</option>
-                      <option>Evening (5PM - 8PM)</option>
-                    </select>
+                      required
+                    />
                   </div>
                 </div>
 
+                {/* Provider Selection */}
                 <div>
-                  <label className="text-sm font-medium">
-                    Service Address *
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full mt-1 p-2 border rounded-md"
-                    placeholder="Enter your complete address..."
-                    value={bookingForm.address}
-                    onChange={(e) =>
-                      setBookingForm((prev) => ({
-                        ...prev,
-                        address: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">
-                    Brief Description *
-                  </label>
-                  <textarea
-                    className="w-full mt-1 p-2 border rounded-md"
-                    rows={3}
-                    placeholder="Describe your service needs..."
-                    value={bookingForm.description}
-                    onChange={(e) =>
-                      setBookingForm((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Provider Selection */}
-              <div>
-                <h4 className="font-semibold mb-2">Available Providers</h4>
-                {isLoading ? (
-                  <div className="text-center py-4">Loading technicians...</div>
-                ) : technicians && technicians.length > 0 ? (
-                  <div className="space-y-2">
-                    {technicians.map((tech) => (
-                      <div
-                        key={tech._id}
-                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
-                          bookingForm.selectedProvider === tech._id
-                            ? "bg-primary/10 border-primary"
-                            : "hover:bg-gray-50"
-                        }`}
-                        onClick={() =>
-                          setBookingForm((prev) => ({
-                            ...prev,
-                            selectedProvider: tech._id,
-                          }))
-                        }
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Users className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {tech.userName || "Technician"}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm capitalize">
-                                {tech.skills}
-                              </span>
+                  <h4 className="font-semibold mb-2">Available Providers *</h4>
+                  {isTechnicianLoading ? (
+                    <div className="text-center py-4">
+                      Loading technicians...
+                    </div>
+                  ) : technicians && technicians.length > 0 ? (
+                    <div className="space-y-2">
+                      {technicians.map((tech) => (
+                        <div
+                          key={tech._id}
+                          className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                            bookingForm.selectedProvider === tech._id
+                              ? "bg-primary/10 border-primary"
+                              : "hover:bg-gray-50"
+                          }`}
+                          onClick={() =>
+                            setBookingForm((prev) => ({
+                              ...prev,
+                              selectedProvider: tech._id,
+                            }))
+                          }
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                              <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {tech.userName || "Technician"}
+                              </p>
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm capitalize">
+                                  {tech.skills}
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={tech.isActive ? "default" : "secondary"}
+                            >
+                              {tech.isActive ? "Available" : "Unavailable"}
+                            </Badge>
+                            {bookingForm.selectedProvider === tech._id && (
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant={tech.isActive ? "default" : "secondary"}
-                          >
-                            {tech.isActive ? "Available" : "Unavailable"}
-                          </Badge>
-                          {bookingForm.selectedProvider === tech._id && (
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No technicians available for this service
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      No technicians available for this service
+                    </div>
+                  )}
 
-                {bookingForm.selectedProvider && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Selected:{" "}
-                    <strong>
-                      {technicians?.find(
-                        (t) => t._id === bookingForm.selectedProvider
-                      )?.userName || "None"}
-                    </strong>
-                  </p>
-                )}
+                  {bookingForm.selectedProvider && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Selected:{" "}
+                      <strong>
+                        {technicians?.find(
+                          (t) => t._id === bookingForm.selectedProvider
+                        )?.userName || "None"}
+                      </strong>
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setIsBookingModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleBookingSubmit}>Confirm Booking</Button>
-          </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setIsBookingModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Confirm Booking</Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
-      <BookingList />
+
+      <BookingList isMyBookingsOpen={isMyBookingsOpen} setIsMyBookingsOpen={setIsMyBookingsOpen} />
     </main>
   );
 };

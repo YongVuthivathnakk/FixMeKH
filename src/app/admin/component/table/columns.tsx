@@ -51,7 +51,7 @@ export type Technician = {
   userId?: Id<"users">,
   userName?: string,
   userPhone?: string,
-  skills?: string[],
+  skills?: string,
   loaction?: string,
   isActive?: boolean,
   rating?: number,

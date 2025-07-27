@@ -71,11 +71,9 @@ bookings: defineTable({
     ),
     description: v.string(),
     address: v.string(),
-    location: v.optional(v.string()), // Could be coordinates or district
     
     // Scheduling
     bookingDate: v.number(), // When the booking was made (timestamp)
-    serviceDate: v.string(), // Date format "YYYY-MM-DD"
     timeSlot: v.union(
       v.literal("Morning (9AM - 12PM)"),
       v.literal("Afternoon (12PM - 5PM)"),
@@ -90,34 +88,9 @@ bookings: defineTable({
       v.literal("cancelled"),
       v.literal("rescheduled")
     ),
-    
-    // Payment info
-    price: v.number(),
-    paymentMethod: v.union(
-      v.literal("Cash"),
-      v.literal("Bank Transfer"),
-      v.literal("Credit Card"),
-      v.literal("Other")
-    ),
-    paymentStatus: v.union(
-      v.literal("pending"),
-      v.literal("paid"),
-      v.literal("refunded")
-    ),
-    
-    // Additional metadata
-    estimatedDuration: v.string(), // e.g. "2-3 hours"
-    specialNotes: v.optional(v.string()),
-    cancellationReason: v.optional(v.string()),
-    rescheduledFrom: v.optional(v.id("bookings")),
-    
-    // System fields
-    createdAt: v.number(),
-    updatedAt: v.number(),
   })
   .index("by_user", ["userId"])
   .index("by_technician", ["technicianId"])
-  .index("by_service_date", ["serviceDate"])
   .index("by_status", ["status"]) 
   .index("by_user_status", ["userId", "status"]),
 });
