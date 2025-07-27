@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { auth } from "./auth";
 import { Id } from "./_generated/dataModel";
 
-
+// Get the current user
 export const current = query({
     args: {},
     handler: async (ctx) => {
@@ -16,13 +16,14 @@ export const current = query({
     }
 })
 
-
+// Get all users
 export const getUsers = query(async ({ db }) => {
     const users = await db.query("users").collect();
     return users;
 })
 
 
+// Get user by ID
 export const getUserById = query({
     args: { _id: v.string() },
     handler: async (ctx, args) => {
@@ -31,6 +32,7 @@ export const getUserById = query({
     }
 });
 
+// Get the user role
 export const userRole = query({
     args: {},
     handler: async (ctx) => {
@@ -50,7 +52,7 @@ export const userRole = query({
     }
 })
 
-
+// Update phone column
 export const updatePhone = mutation({
     args: { phone: v.string() },
     handler: async (ctx, args) => {
@@ -62,7 +64,7 @@ export const updatePhone = mutation({
     }
 })
 
-
+// Assign default for the users
 export const defineDefaultRole = mutation({
     args: {},
     handler: async (ctx, args) => {
@@ -74,63 +76,82 @@ export const defineDefaultRole = mutation({
     }
 });
 
+
+// Update the user role based on the ID
 export const updateUserRole = mutation({
-    args: {
-        userId: v.string(),
-        newRole: v.optional(v.union(v.literal("user"), v.literal("admin"))),
-    },
-    handler: async (ctx, args) => {
-        const userId = args.userId as Id<"users">;
+  args: {
+    userId: v.string(),
+    newRole: v.optional(v.union(
+      v.literal("user"),
+      v.literal("admin")
+    )),
+  },
+  handler: async (ctx, args) => {
+    const userId = args.userId as Id<"users">;
 
-        // Update the user's role
-        await ctx.db.patch(userId, {
-            role: args.newRole,
+    // Fetch current user to check their current role
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Step 1: Update user role
+    await ctx.db.patch(userId, {
+      role: args.newRole,
+    });
+
+    // Step 2: Handle admin insert/delete
+    if (args.newRole === "admin") {
+      const alreadyAdmin = await ctx.db
+        .query("admins")
+        .withIndex("by_userId", (q) => q.eq("userId", userId))
+        .unique();
+
+      if (!alreadyAdmin && user.name && user.email) {
+        await ctx.db.insert("admins", {
+          userId,
+          userName: user.name,
+          userEmail: user.email,
         });
+      }
+    } else {
+      const wasAdmin = await ctx.db
+        .query("admins")
+        .withIndex("by_userId", (q) => q.eq("userId", userId))
+        .unique();
 
-        if (args.newRole === "admin") {
-            // Add to admins table if not exists
-            const alreadyAdmin = await ctx.db
-                .query("admins")
-                .withIndex("by_userId", (q) => q.eq("userId", userId))
-                .unique();
+      if (wasAdmin) {
+        await ctx.db.delete(wasAdmin._id);
+      }
+    }
 
-            if (!alreadyAdmin) {
-                const user = await ctx.db.get(userId);
-                if (!user || !user.name) throw new Error("User not found of has no name");
+    // If role was previously 'technician', delete from technicians table
+    if (user.role === "technician") {
+      const technician = await ctx.db
+        .query("technicians")
+        .withIndex("by_userId", (q) => q.eq("userId", userId))
+        .unique();
 
-                await ctx.db.insert("admins", {
-                    userId,
-                    userName: user.name,
-                });
-            }
-        } else if (args.newRole === "user") {
-            // Remove from admins table if exists
-            const wasAdmin = await ctx.db
-                .query("admins")
-                .withIndex("by_userId", (q) => q.eq("userId", userId))
-                .unique();
-
-            if (wasAdmin) {
-                await ctx.db.delete(wasAdmin._id);
-            }
-        }
-        // If newRole is undefined, you can decide what to do here (optional)
-    },
+      if (technician) {
+        await ctx.db.delete(technician._id);
+      }
+    }
+  },
 });
 
 
+// Verify each time the user login / sign in
 export const setEmailVarifiactionTime = mutation({
-    args: {},
-    handler: async (ctx) => {
-        const userId = await auth.getUserId(ctx);
-        if (!userId) {
-            return null;
-        }
-        await ctx.db.patch(userId, {
-            emailVerificationTime: Date.now(),
-        })
-    }
-})
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+
+    await ctx.db.patch(userId, {
+      emailVerificationTime: Date.now(),
+    });
+  },
+});
 
 export const setPhoneVerificationTime = mutation({
     args: {},
@@ -143,4 +164,4 @@ export const setPhoneVerificationTime = mutation({
             phoneVerificationTime: Date.now(),
         })
     }
-})
+});

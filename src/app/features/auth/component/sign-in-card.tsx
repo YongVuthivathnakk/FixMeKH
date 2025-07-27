@@ -1,5 +1,4 @@
-import { useAuthActions } from "@convex-dev/auth/react"
-
+import { useAuthActions } from "@convex-dev/auth/react";
 
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
@@ -17,40 +16,46 @@ import React, { useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import { setEmailVarifiactionTime } from "../../../../../convex/users";
 
 interface SignInCardProps {
-    setState: (state: SignInFlow) => void;
+  setState: (state: SignInFlow) => void;
 }
 
-
-export const SignInCard = ({setState}: SignInCardProps) => {
+export const SignInCard = ({ setState }: SignInCardProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
   const setVerifiedTime = useMutation(api.users.setEmailVarifiactionTime);
+  const setVisitTime = useMutation(api.visits.logVisit);
   const { signIn } = useAuthActions();
-
-
 
   const handleProvider = (value: "google") => {
     signIn(value);
-  } 
+  };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setIsPending(true);
-    signIn("password", { email, password, flow: "signIn" })
-      .catch(() => {
-        setError("Invalid Email or Password")
-      })
-      .finally(() => {
-        setVerifiedTime();
-        setIsPending(false);
-      })
-  }
+    setError(""); // optional: clear old error
+
+    try {
+      const result = await signIn("password", {
+        email,
+        password,
+        flow: "signIn",
+      });
+
+      if (result) {
+        await setVerifiedTime();
+        await setVisitTime();
+      }
+    } catch (err) {
+      setError("Invalid Email or Password");
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   return (
     <Card className="w-full h-full p-8">
@@ -61,11 +66,11 @@ export const SignInCard = ({setState}: SignInCardProps) => {
         </CardDescription>
       </CardHeader>
       {!!error && (
-          <div className='bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive'>
-            <TriangleAlert className="size-4"/>
-            <p>{error}</p>
-          </div>
-        )}
+        <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive">
+          <TriangleAlert className="size-4" />
+          <p>{error}</p>
+        </div>
+      )}
       <CardContent className="space-y-5 px-0 pb-0">
         <form className="space-y-2.5" onSubmit={(e) => handleSubmit(e)}>
           <Input
@@ -85,7 +90,13 @@ export const SignInCard = ({setState}: SignInCardProps) => {
             type="password"
             required
           />
-          <Button type="submit" className="w-full" size={"lg"} disabled={isPending}>
+
+          <Button
+            type="submit"
+            className="w-full"
+            size={"lg"}
+            disabled={isPending}
+          >
             Continue
           </Button>
         </form>
@@ -102,8 +113,16 @@ export const SignInCard = ({setState}: SignInCardProps) => {
             <span>Continue With Google</span>
           </Button>
         </div>
-        <p onClick={()=> {setState("signUp")}} className="text-xs text-muted-foreground">
-            Don&apos;t have account? <span className="text-sky-700 hover:underline cursor-pointer">Sign Up</span>
+        <p
+          onClick={() => {
+            setState("signUp");
+          }}
+          className="text-xs text-muted-foreground"
+        >
+          Don&apos;t have account?{" "}
+          <span className="text-sky-700 hover:underline cursor-pointer">
+            Sign Up
+          </span>
         </p>
       </CardContent>
     </Card>

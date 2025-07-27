@@ -35,7 +35,6 @@ export const CreatePhoneModal = ({ phone }: CreatePhoneModalProps) => {
             setOpen(false);
         }
         setPhoneNumber("");
-        
     }
 
 

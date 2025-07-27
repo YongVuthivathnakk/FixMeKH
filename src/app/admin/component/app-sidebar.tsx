@@ -2,6 +2,8 @@
 
 import {
   ChevronUp,
+  File,
+  FileText,
   LucideLayoutDashboard,
   User2,
   UserCog2,
@@ -52,6 +54,11 @@ const items = [
     title: "Teams",
     url: "/admin/teams",
     icon: UsersRound,
+  },
+    {
+    title: "bookings",
+    url: "/admin/bookings",
+    icon: FileText,
   },
 ];
 

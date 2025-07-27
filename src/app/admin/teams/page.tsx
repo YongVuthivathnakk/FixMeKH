@@ -1,10 +1,28 @@
+"use client";
+
+import { useAllAdmins } from "@/app/features/admin/api/use-all-admins";
+import { DataTable } from "../component/table/data-table";
+import { Loader } from "lucide-react";
+import { AdminColumns } from "../component/table/columns";
+
 const TeamsDashboardPage = () => {
-    return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <h1 className="text-2xl font-bold">Teams Dashboard</h1>
-            <p className="mt-4 text-gray-600">Welcome to your dashboard!</p>
-        </div>
+
+
+    const {admins, isAdminsLoading} = useAllAdmins();
+    if(isAdminsLoading) {
+            return (
+    <div className="flex flex-col h-full gap-y-4 items-center justify-center">
+         <p className="text-lg font-bold">Loading</p>
+         <Loader className="size-4 animate-spin text-muted-foreground" />
+      </div>
     );
-}
+    }
+
+  return (
+      <div className="container mx-auto py-10">
+        <DataTable columns={AdminColumns} showCreateButton={false} data={admins} />
+      </div>
+  );
+};
 
 export default TeamsDashboardPage;
