@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useMutation } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -32,11 +33,32 @@ export type User = {
   name?: string;
   phone?: string;
   phoneVerificationTime?: number;
-  role?: "admin" | "user";
+  role?: "admin" | "user" | "technician";
   _creationTime: number;
 };
 
-export const columns: ColumnDef<User>[] = [
+export type Admin = {
+    _id: Id<"admins">;
+    _creationTime: number;
+    userId?: Id<"users">;
+    userName?: string;
+    userEmail?: string;
+}
+
+export type Technician = {
+  _id: Id<"technicians">,
+  _creationTime: number;
+  userId?: Id<"users">,
+  userName?: string,
+  userPhone?: string,
+  skills?: string[],
+  loaction?: string,
+  isActive?: boolean,
+  rating?: number,
+  jobCount?: number,
+}
+
+export const userColumns: ColumnDef<User>[] = [
   {
     accessorKey: "email",
     header: ({ column }) => {
@@ -177,3 +199,60 @@ export const columns: ColumnDef<User>[] = [
     },
   },
 ];
+
+
+export const AdminColumns: ColumnDef<Admin>[] = [
+  {
+    accessorKey: "userName",
+    header: "Name",
+  },
+  {
+    accessorKey: "userEmail",
+    header: "Email",
+  },
+  {
+    accessorKey: "userId",
+    header: "User ID",
+  },
+];
+
+
+export const TechnicianColumns: ColumnDef<Technician>[] = [
+  {
+    accessorKey: "_id",
+    header: "_id",
+  },
+  {
+    accessorKey: "userName",
+    header: "Name",
+  },
+  {
+    accessorKey: "userEmail",
+    header: "Email",
+  },
+  {
+    accessorKey: "userPhone",
+    header: "Phone",
+  },
+  {
+    accessorKey: "skills",
+    header: "Skills",
+  },
+  {
+    accessorKey: "loaction",
+    header: "Location",
+  },
+  {
+    accessorKey: "isActive",
+    header: "isActive",
+  },
+  {
+    accessorKey: "rating",
+    header: "Header",
+  },
+  {
+    accessorKey: "jobCount",
+    header: "JobCount"
+  }
+];
+

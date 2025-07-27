@@ -35,11 +35,15 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  showCreateButton?: boolean;
+  onCreateClick?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  showCreateButton,
+  onCreateClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -66,43 +70,70 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  function hasAccessorKey<TData, TValue>(
+    col: ColumnDef<TData, TValue>
+  ): col is ColumnDef<TData, TValue> & { accessorKey: string } {
+    return typeof (col as any).accessorKey === "string";
+  }
+
+  const emailColumnKey =
+    columns.filter(hasAccessorKey).find((col) => col.accessorKey === "email")
+      ?.accessorKey ??
+    columns
+      .filter(hasAccessorKey)
+      .find((col) => col.accessorKey === "userEmail")?.accessorKey;
+
   return (
     <div className="px-8">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns
+      <div className="flex justify-between py-4">
+        {emailColumnKey && (
+          <Input
+            placeholder="Filter emails..."
+            value={
+              (table.getColumn(emailColumnKey)?.getFilterValue() as string) ??
+              ""
+            }
+            onChange={(event) =>
+              table
+                .getColumn(emailColumnKey)
+                ?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        )}
+        <div>
+          {showCreateButton && (
+            <Button className="ml-auto" onClick={onCreateClick}>
+              Create Technician
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-4">
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

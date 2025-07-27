@@ -1,10 +1,11 @@
+import { Card } from "@/components/ui/card";
+import { DashboardChart } from "../component/chart/dashboard-chart";
 
 const AdminDashboardPage = () => {
-
   // Users
   return (
-    <div >
-      Dashboard
+    <div>
+      <DashboardChart />
     </div>
   );
 };

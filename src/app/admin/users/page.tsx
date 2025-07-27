@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader, MoreHorizontal, SlidersHorizontal, Users } from "lucide-react";
 
-import { columns, User } from "../component/user/columns"
-import { DataTable } from "../component/user/data-table"
+import { userColumns } from "../component/table/columns"
+import { DataTable } from "../component/table/data-table"
  
 const userDashboardPage = () => {
 
-const users = useAllUsers();
-if(!users) {
+const {users, isUsersLoading} = useAllUsers();
+
+if(isUsersLoading) {
     return (
     <div className="flex flex-col h-full gap-y-4 items-center justify-center">
          <p className="text-lg font-bold">Loading</p>
@@ -23,7 +24,7 @@ if(!users) {
 }
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={users} />
+      <DataTable columns={userColumns} showCreateButton={false} data={users} />
     </div>
   )
 }
