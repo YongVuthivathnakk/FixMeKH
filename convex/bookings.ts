@@ -26,6 +26,7 @@ export const createBooking = mutation({
   args: {
     userId: v.id("users"),
     technicianId: v.id("technicians"),
+    userEmail: v.string(),
     serviceType: v.union(
       v.literal("plumber"),
       v.literal("cleaner"),
@@ -52,6 +53,7 @@ export const createBooking = mutation({
   handler: async (ctx, args) => {
     const bookingId = await ctx.db.insert("bookings", {
       userId: args.userId,
+      userEmail: args.userEmail,
       technicianId: args.technicianId,
       serviceType: args.serviceType,
       description: args.description,
@@ -64,3 +66,10 @@ export const createBooking = mutation({
     return bookingId;
   },
 });
+
+
+export const getAllBookings = query(async ({ db }) => {
+  const bookings = await db.query("bookings").collect();
+  return bookings;
+})
+

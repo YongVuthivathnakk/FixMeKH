@@ -174,7 +174,7 @@ export const HomeMain = ({
     return null;
   }
 
-  const { _id } = data;
+  const { _id, email } = data;
 
   const handleServiceBooking = (serviceName: Skill) => {
     setSelectedService(serviceName);
@@ -203,10 +203,12 @@ export const HomeMain = ({
     try {
       const timestamp = new Date(bookingForm.date).getTime();
       const userId = _id;
+      const userEmail = email;
 
       await createBooking({
         userId: userId as Id<"users">,
         technicianId: bookingForm.selectedProvider as Id<"technicians">,
+        userEmail: userEmail as any,
         serviceType: selectedService as any,
         description: bookingForm.description,
         address: bookingForm.address,

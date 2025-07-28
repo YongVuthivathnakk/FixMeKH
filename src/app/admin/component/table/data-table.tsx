@@ -84,7 +84,7 @@ export function DataTable<TData, TValue>({
       .find((col) => col.accessorKey === "userEmail")?.accessorKey;
 
   return (
-    <div className="px-8">
+    <div>
       <div className="flex justify-between py-4">
         {emailColumnKey && (
           <Input

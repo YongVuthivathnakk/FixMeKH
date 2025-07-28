@@ -21,6 +21,8 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -57,6 +59,21 @@ export type Technician = {
   rating?: number,
   jobCount?: number,
 }
+
+export type Booking = {
+  _id: Id<"bookings">;
+  _creationTime: number;
+  userId: Id<"users">;
+  technicianId: Id<"technicians">;
+  serviceType: "plumber" | "cleaner" | "electrician" | "appliance repair";
+  userEmail?: string;
+  description: string;
+  address: string;
+  bookingDate: number; // ✅ fix this to number
+  timeSlot: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed" | "rescheduled";
+};
+
 
 export const userColumns: ColumnDef<User>[] = [
   {
@@ -253,6 +270,65 @@ export const TechnicianColumns: ColumnDef<Technician>[] = [
   {
     accessorKey: "jobCount",
     header: "JobCount"
-  }
+  },
+]
+export const BookingColumns: ColumnDef<Booking>[] = [
+  {
+    accessorKey: "_id",
+    header: "_id",
+  },
+  {
+    accessorKey: "technicianId",
+    header: "Technician",
+  },
+  {
+    accessorKey: "userEmail",
+    header: "Email",
+  },
+  {
+    accessorKey: "serviceType",
+    header: "Service",
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+  },
+  {
+    accessorKey: "address",
+    header: "Address",
+  },
+  {
+    accessorKey: "bookingDate",
+    header: "Date",
+    cell: ({ row }) => {
+      const value = row.getValue("bookingDate") as number;
+      return format(new Date(value), "dd MMM yyyy");
+    },
+  },
+  {
+    accessorKey: "timeSlot",
+    header: "Time Slot",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge
+          variant={
+            status === "completed"
+              ? "default"
+              : status === "cancelled"
+              ? "destructive"
+              : "secondary"
+          }
+          className="capitalize"
+        >
+          {status}
+        </Badge>
+      );
+    },
+  },
 ];
 

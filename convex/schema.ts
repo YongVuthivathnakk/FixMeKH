@@ -56,13 +56,9 @@ const schema = defineSchema({
 
 
 bookings: defineTable({
-    // User who made the booking
     userId: v.id("users"),
-    
-    // Technician assigned to the booking
     technicianId: v.id("technicians"),
-    
-    // Service details
+    userEmail: v.optional(v.string()),
     serviceType: v.union(
       v.literal("plumber"),
       v.literal("cleaner"),
@@ -71,16 +67,12 @@ bookings: defineTable({
     ),
     description: v.string(),
     address: v.string(),
-    
-    // Scheduling
     bookingDate: v.number(), // When the booking was made (timestamp)
     timeSlot: v.union(
       v.literal("Morning (9AM - 12PM)"),
       v.literal("Afternoon (12PM - 5PM)"),
       v.literal("Evening (5PM - 8PM)")
     ),
-    
-    // Status tracking
     status: v.union(
       v.literal("pending"),
       v.literal("confirmed"),

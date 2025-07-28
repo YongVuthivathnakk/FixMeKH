@@ -85,7 +85,7 @@ const { data: visits, isLoading } = useAllVisits();
             Showing total visitors for the last 1 month
           </CardDescription>
         </div>
-        <div className="flex border">
+        <div className="flex border-l">
           <div className="relative z-30 flex flex-col justify-center gap-1 px-6 py-4 text-left sm:px-8 sm:py-6">
             <span className="text-muted-foreground text-xs">Total Visit</span>
             <span className="text-lg leading-none font-bold sm:text-3xl">
